@@ -17,7 +17,7 @@ public class ChannelService {
 
     private static final String READ_POSTFIX = ".read";
 
-    private static final String WRITE_POSTFIX = "write";
+    private static final String WRITE_POSTFIX = ".write";
 
     private static final String TOGGLE_POSTFIX = ".toggle";
 
@@ -26,7 +26,7 @@ public class ChannelService {
     public Collection<MessageReceiver> getChannelMembers(AtherysMessageChannel channel) {
         // If the channel is broadcast, return all players
         if (channel.isBroadcast()) {
-            return Sponge.getServer().getOnlinePlayers().stream().map(p -> p.getCommandSource().orElse(null)).collect(Collectors.toSet());
+            return Sponge.getServer().getOnlinePlayers().parallelStream().map(p -> (MessageReceiver) p).collect(Collectors.toSet());
         }
 
         // If the channel is not broadcast, return only players who have permissions to read
