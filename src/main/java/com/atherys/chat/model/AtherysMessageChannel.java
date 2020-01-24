@@ -1,6 +1,7 @@
 package com.atherys.chat.model;
 
 import com.atherys.chat.AtherysChat;
+import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TextTemplate;
 import org.spongepowered.api.text.channel.MessageChannel;
@@ -58,7 +59,20 @@ public class AtherysMessageChannel implements MessageChannel {
 
     @Override
     public void send(@Nullable Object sender, Text original) {
-        AtherysChat.getInstance().getChannelFacade().sendMessageTo(this, sender, original);
+        try {
+            AtherysChat.getInstance().getChannelFacade().sendMessageTo(this, sender, original);
+        } catch (CommandException e) {
+            if (sender instanceof MessageReceiver) {
+                Text error = e.getText();
+
+                if (error != null) {
+                    ((MessageReceiver) sender).sendMessage(error);
+                    return;
+                }
+            }
+
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -55,7 +55,7 @@ public class AtherysChat {
     }
 
     private void start() {
-
+        getChannelFacade().init();
     }
 
     private void stop() {

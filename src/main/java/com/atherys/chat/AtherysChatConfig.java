@@ -14,11 +14,10 @@ public class AtherysChatConfig extends PluginConfig {
 
     @Setting("channels")
     public Set<ChannelConfig> CHANNELS = new HashSet<>();
-
     {
         ChannelConfig defaultChannel = new ChannelConfig();
         defaultChannel.setId("default");
-        defaultChannel.setTemplate("%PLAYER_NAME%: %MESSAGE%");
+        defaultChannel.setTemplate("[%CHANNEL_ID%] %SENDER%: %ORIGINAL_MESSAGE%");
         defaultChannel.setBroadcastChannel(true);
 
         CHANNELS.add(defaultChannel);

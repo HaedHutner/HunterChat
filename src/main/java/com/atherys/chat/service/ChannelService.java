@@ -1,7 +1,6 @@
 package com.atherys.chat.service;
 
 import com.atherys.chat.model.AtherysMessageChannel;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Singleton;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -26,7 +25,7 @@ public class ChannelService {
     public Collection<MessageReceiver> getChannelMembers(AtherysMessageChannel channel) {
         // If the channel is broadcast, return all players
         if (channel.isBroadcast()) {
-            return Sponge.getServer().getOnlinePlayers().parallelStream().map(p -> (MessageReceiver) p).collect(Collectors.toSet());
+            return Sponge.getServer().getOnlinePlayers().stream().map(p -> (MessageReceiver) p).collect(Collectors.toSet());
         }
 
         // If the channel is not broadcast, return only players who have permissions to read
