@@ -32,21 +32,29 @@ public class ChannelFacade {
             throw new AtherysChatException("You do not have permission to join the ", channel.getId(), " channel.");
         }
 
-        source.setMessageChannel(channel);
-        channelService.addPlayerToChannel(source, channel);
-        cmf.info(source, "You are now chatting in ", channel.getColor(), channel.getId(), ".");
+        addPlayerToChannel(source, channel);
     }
 
     public void leaveChannel(Player source, AtherysChannel channel) throws CommandException {
         if (channel.getPlayers().contains(source.getUniqueId())) {
-            channelService.removePlayerFromChannel(source, channel);
-
-            if (source.getMessageChannel().equals(channel)) {
-                joinChannel(source, channelService.getPlayerChannel(source));
-            }
+            removePlayerFromChannel(source, channel);
         } else {
             throw new AtherysChatException("You are not in that channel.");
         }
+    }
+
+    public void removePlayerFromChannel(Player player, AtherysChannel channel) {
+        channelService.removePlayerFromChannel(player, channel);
+
+        if (player.getMessageChannel().equals(channel)) {
+            addPlayerToChannel(player, channelService.getPlayerChannel(player));
+        }
+    }
+
+    public void addPlayerToChannel(Player player, AtherysChannel channel) {
+        player.setMessageChannel(channel);
+        channelService.addPlayerToChannel(player, channel);
+        cmf.info(player, "You are now chatting in ", channel.getColor(), channel.getId(), ".");
     }
 }
 
