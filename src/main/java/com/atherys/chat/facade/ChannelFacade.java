@@ -40,7 +40,10 @@ public class ChannelFacade {
     public void leaveChannel(Player source, AtherysChannel channel) throws CommandException {
         if (channel.getPlayers().contains(source.getUniqueId())) {
             channelService.removePlayerFromChannel(source, channel);
-            joinChannel(source, channelService.getPlayerChannel(source));
+
+            if (source.getMessageChannel().equals(channel)) {
+                joinChannel(source, channelService.getPlayerChannel(source));
+            }
         } else {
             throw new AtherysChatException("You are not in that channel.");
         }
