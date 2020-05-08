@@ -1,7 +1,10 @@
 package com.atherys.chat;
 
+import com.atherys.chat.command.ChatCommand;
 import com.atherys.chat.facade.ChannelFacade;
+import com.atherys.chat.facade.ChatMessagingFacade;
 import com.atherys.chat.service.ChannelService;
+import com.atherys.core.command.CommandService;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
@@ -48,20 +51,31 @@ public class AtherysChat {
     private void init () {
         instance = this;
 
+        components = new Components();
+
         chatInjector = spongeInjector.createChildInjector();
         chatInjector.injectMembers(components);
+
+        try {
+            CommandService.getInstance().register(new ChatCommand(), this);
+        } catch (CommandService.AnnotatedCommandException e) {
+            e.printStackTrace();
+        }
+
+        components.config.init();
 
         init = true;
     }
 
     private void start() {
-        getChannelFacade().init();
+        getChannelService().init();
     }
 
     private void stop() {
 
     }
 
+    @Listener
     public void onInit(GameInitializationEvent event) {
         init();
     }
@@ -88,6 +102,10 @@ public class AtherysChat {
         return components.channelService;
     }
 
+    public ChatMessagingFacade getChatMessagingFacade() {
+        return components.chatMessagingFacade;
+    }
+
     private static class Components {
         @Inject
         AtherysChatConfig config;
@@ -97,5 +115,8 @@ public class AtherysChat {
 
         @Inject
         ChannelService channelService;
+
+        @Inject
+        ChatMessagingFacade chatMessagingFacade;
     }
 }

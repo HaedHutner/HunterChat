@@ -1,10 +1,10 @@
 package com.atherys.chat.exception;
 
+import com.atherys.chat.AtherysChat;
 import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.text.Text;
 
 public class AtherysChatException extends CommandException {
-    public AtherysChatException(Text message) {
-        super(message);
+    public AtherysChatException(Object... message) {
+        super(AtherysChat.getInstance().getChatMessagingFacade().formatError(message));
     }
 }

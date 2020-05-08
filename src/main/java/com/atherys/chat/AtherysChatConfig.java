@@ -15,13 +15,11 @@ public class AtherysChatConfig extends PluginConfig {
     @Setting("channels")
     public Set<ChannelConfig> CHANNELS = new HashSet<>();
     {
-        ChannelConfig defaultChannel = new ChannelConfig();
-        defaultChannel.setId("default");
-        defaultChannel.setTemplate("[%CHANNEL_ID%] %SENDER%: %ORIGINAL_MESSAGE%");
-        defaultChannel.setBroadcastChannel(true);
-
-        CHANNELS.add(defaultChannel);
+        CHANNELS.add(new ChannelConfig());
     }
+
+    @Setting("default-channel")
+    public String DEFAULT_CHANNEL = "default";
 
     protected AtherysChatConfig() throws IOException {
         super("config/" + AtherysChat.ID, "config.conf");

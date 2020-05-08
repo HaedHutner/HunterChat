@@ -1,15 +1,26 @@
 package com.atherys.chat.service;
 
-import com.atherys.chat.model.AtherysMessageChannel;
+import com.atherys.chat.AtherysChatConfig;
+import com.atherys.chat.config.ChannelConfig;
+import com.atherys.chat.model.AtherysChannel;
+import com.atherys.core.AtherysCore;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.ChatTypeMessageReceiver;
 import org.spongepowered.api.text.channel.MessageReceiver;
+import org.spongepowered.api.text.chat.ChatType;
+import org.spongepowered.api.text.serializer.TextSerializers;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
+import javax.annotation.Nullable;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @Singleton
 public class ChannelService {
@@ -22,36 +33,116 @@ public class ChannelService {
 
     private static final String FORMAT_POSTFIX = ".format";
 
-    public Collection<MessageReceiver> getChannelMembers(AtherysMessageChannel channel) {
-        // If the channel is broadcast, return all players
-        if (channel.isBroadcast()) {
-            return Sponge.getServer().getOnlinePlayers().stream().map(p -> (MessageReceiver) p).collect(Collectors.toSet());
+    @Inject
+    private AtherysChatConfig config;
+
+    private Map<String, AtherysChannel> channels = new HashMap<>();
+    private AtherysChannel defaultChannel;
+
+    public void init() {
+        for (ChannelConfig channelConfig : config.CHANNELS) {
+            AtherysChannel channel = new AtherysChannel(channelConfig.getId());
+
+            channel.setBroadcast(channelConfig.isBroadcastChannel());
+            channel.setPrefix(TextSerializers.FORMATTING_CODE.deserialize(channelConfig.getPrefix()));
+            channel.setColor(channelConfig.getColor());
+            channel.setPermission(channelConfig.getPermission());
+            channel.setRange(channelConfig.getRange());
+
+            registerChannel(channel);
         }
 
-        // If the channel is not broadcast, return only players who have permissions to read
-        PermissionService service = Sponge.getGame().getServiceManager().provideUnchecked(PermissionService.class);
+        this.defaultChannel = channels.get(config.DEFAULT_CHANNEL);
+    }
 
-        return service.getLoadedCollections().values().stream()
-                .flatMap(input -> input.getLoadedWithPermission(getReadPermission(channel)).entrySet().stream()
-                        .filter(Map.Entry::getValue)
-                        .map(entry -> entry.getKey().getCommandSource().orElse(null))
-                        .filter(Objects::nonNull))
+    public void registerChannel(AtherysChannel channel) {
+        this.channels.put(channel.getId(), channel);
+    }
+
+    public Map<String, AtherysChannel> getChannels() {
+        return channels;
+    }
+
+    public AtherysChannel getPlayerChannel(Player player) {
+        for (AtherysChannel channel : channels.values()) {
+            if (channel.getPlayers().contains(player.getUniqueId())) {
+                return channel;
+            }
+        }
+
+        return defaultChannel;
+    }
+
+    public Optional<AtherysChannel> getChannelById(String id) {
+        return Optional.ofNullable(channels.get(id));
+    }
+
+    public void addPlayerToChannel(Player player, AtherysChannel channel) {
+        channel.getPlayers().add(player.getUniqueId());
+    }
+
+    public void removePlayerFromChannel(Player player, AtherysChannel channel) {
+        channel.getPlayers().remove(player.getUniqueId());
+    }
+
+    public Text getNameWithPrefix(CommandSource commandSource) {
+        String name = commandSource.getName();
+        return Text.of(TextSerializers.FORMATTING_CODE.deserialize(commandSource.getOption("prefix").orElse("")), " ", name, ": ");
+    }
+
+    public Optional<Text> transformMessage(AtherysChannel channel, Object sender, MessageReceiver receiver, Text original) {
+        AtherysCore.getInstance().getLogger().info("Messaged");
+        Text.Builder builder = Text.builder();
+        builder.append(channel.getPrefix());
+
+        Text body = original;
+        if (sender instanceof CommandSource) {
+            builder.append(getNameWithPrefix((CommandSource) sender));
+            String raw = original.toPlain();
+            raw = raw.replaceFirst("<" + ((CommandSource) sender).getName() + ">", "").trim();
+            body = TextSerializers.FORMATTING_CODE.deserialize(raw);
+        }
+        builder.append(Text.of(channel.getColor(), body));
+
+        return Optional.of(builder.build());
+    }
+
+    public Collection<MessageReceiver> getChannelMembers(AtherysChannel channel) {
+        // If the channel is broadcast, return all players
+        if (channel.isBroadcast()) {
+            return new ArrayList<>(Sponge.getServer().getOnlinePlayers());
+        }
+
+        return Sponge.getServer().getOnlinePlayers().stream()
+                .filter(player -> channel.getPlayers().contains(player.getUniqueId()))
                 .collect(Collectors.toSet());
     }
 
-    public String getReadPermission(AtherysMessageChannel channel) {
+    public void sendToChannel(AtherysChannel channel, @Nullable Object sender, Text original, ChatType type) {
+        checkNotNull(original, "original text");
+        checkNotNull(type, "type");
+        for (MessageReceiver member : channel.getMembers(sender)) {
+            if (member instanceof ChatTypeMessageReceiver) {
+                channel.transformMessage(sender, member, original, type).ifPresent(text -> ((ChatTypeMessageReceiver) member).sendMessage(type, text));
+            } else {
+                channel.transformMessage(sender, member, original, type).ifPresent(member::sendMessage);
+            }
+        }
+    }
+
+    public String getReadPermission(AtherysChannel channel) {
         return channel.getPermission() + READ_POSTFIX;
     }
 
-    public String getWritePermission(AtherysMessageChannel channel) {
+    public String getWritePermission(AtherysChannel channel) {
         return channel.getPermission() + WRITE_POSTFIX;
     }
 
-    public String getTogglePermission(AtherysMessageChannel channel) {
+    public String getTogglePermission(AtherysChannel channel) {
         return channel.getPermission() + TOGGLE_POSTFIX;
     }
 
-    public String getFormatPostfix(AtherysMessageChannel channel) {
+    public String getFormatPostfix(AtherysChannel channel) {
         return channel.getPermission() + FORMAT_POSTFIX;
     }
 }

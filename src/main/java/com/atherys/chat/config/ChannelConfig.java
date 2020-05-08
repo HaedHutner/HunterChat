@@ -2,15 +2,14 @@ package com.atherys.chat.config;
 
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.text.format.TextColors;
 
 @ConfigSerializable
 public class ChannelConfig {
 
     @Setting("id")
     private String id;
-
-    @Setting("template")
-    private String template; // Example: "&c[&rSomeChat&c]&r %PLAYER_NAME%: %MESSAGE%"
 
     /**
      * If the configured permission is "example.plugin.someChat",
@@ -27,40 +26,43 @@ public class ChannelConfig {
     private String permission;
 
     @Setting("is-broadcast")
-    private boolean broadcastChannel;
+    private boolean broadcastChannel = true;
+
+    @Setting("color")
+    private TextColor color = TextColors.WHITE;
+
+    @Setting("prefix")
+    private String prefix = "[Default]";
+
+    @Setting("range")
+    private int range;
 
     public ChannelConfig() {
+        this.id = "default";
     }
 
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getTemplate() {
-        return template;
-    }
-
-    public void setTemplate(String template) {
-        this.template = template;
-    }
-
     public String getPermission() {
         return permission;
-    }
-
-    public void setPermission(String permission) {
-        this.permission = permission;
     }
 
     public boolean isBroadcastChannel() {
         return broadcastChannel;
     }
 
-    public void setBroadcastChannel(boolean broadcastChannel) {
-        this.broadcastChannel = broadcastChannel;
+    public TextColor getColor() {
+        return color;
     }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public int getRange() {
+        return range;
+    }
+
 }
