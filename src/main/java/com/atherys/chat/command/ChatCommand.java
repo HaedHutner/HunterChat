@@ -13,7 +13,8 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 @Description("Base chat command.")
 @Children({
         JoinChannelCommand.class,
-        LeaveChannelCommand.class
+        LeaveChannelCommand.class,
+        SpeakChannelCommand.class
 })
 public class ChatCommand implements CommandExecutor {
     @Override

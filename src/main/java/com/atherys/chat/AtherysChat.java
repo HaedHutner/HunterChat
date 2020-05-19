@@ -3,11 +3,13 @@ package com.atherys.chat;
 import com.atherys.chat.command.ChatCommand;
 import com.atherys.chat.facade.ChannelFacade;
 import com.atherys.chat.facade.ChatMessagingFacade;
+import com.atherys.chat.listener.PlayerListener;
 import com.atherys.chat.service.ChannelService;
 import com.atherys.core.command.CommandService;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartingServerEvent;
@@ -56,6 +58,9 @@ public class AtherysChat {
         chatInjector = spongeInjector.createChildInjector();
         chatInjector.injectMembers(components);
 
+        // Register listeners
+        Sponge.getEventManager().registerListeners(this, components.playerListener);
+
         try {
             CommandService.getInstance().register(new ChatCommand(), this);
         } catch (CommandService.AnnotatedCommandException e) {
@@ -72,7 +77,6 @@ public class AtherysChat {
     }
 
     private void stop() {
-
     }
 
     @Listener
@@ -102,6 +106,10 @@ public class AtherysChat {
         return components.channelService;
     }
 
+    public Logger getLogger() {
+        return logger;
+    }
+
     public ChatMessagingFacade getChatMessagingFacade() {
         return components.chatMessagingFacade;
     }
@@ -118,5 +126,8 @@ public class AtherysChat {
 
         @Inject
         ChatMessagingFacade chatMessagingFacade;
+
+        @Inject
+        PlayerListener playerListener;
     }
 }
