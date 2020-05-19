@@ -1,4 +1,4 @@
 package com.atherys.chat.listener;
 
-public class JoinListener {
+public class PlayerListener {
 }
