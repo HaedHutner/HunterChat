@@ -9,7 +9,7 @@ import com.google.inject.Singleton;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.ChatTypeMessageReceiver;
 import org.spongepowered.api.text.channel.MessageReceiver;
@@ -37,6 +37,11 @@ public class ChannelService {
     private AtherysChatConfig config;
 
     private Map<String, AtherysChannel> channels = new HashMap<>();
+
+    private Map<UUID, AtherysChannel> playerChannelMap = new HashMap<>();
+
+    private Set<AtherysChannel> autoJoinChannels = new HashSet<>();
+
     private AtherysChannel defaultChannel;
 
     public void init() {
@@ -50,6 +55,10 @@ public class ChannelService {
             channel.setRange(channelConfig.getRange());
 
             registerChannel(channel);
+
+            if (config.AUTO_JOIN_CHANNELS.contains(channel.getId())) {
+                this.autoJoinChannels.add(channel);
+            }
         }
 
         this.defaultChannel = channels.get(config.DEFAULT_CHANNEL);
@@ -63,14 +72,15 @@ public class ChannelService {
         return channels;
     }
 
-    public AtherysChannel getPlayerChannel(Player player) {
-        for (AtherysChannel channel : channels.values()) {
-            if (channel.getPlayers().contains(player.getUniqueId())) {
-                return channel;
-            }
+    public void setDefaultChannels(Player player) {
+        for (AtherysChannel channel : autoJoinChannels) {
+            addPlayerToChannel(player, channel);
         }
+        addPlayerToChannel(player, defaultChannel);
+    }
 
-        return defaultChannel;
+    public AtherysChannel getPlayerChannel(Player player) {
+        return playerChannelMap.getOrDefault(player.getUniqueId(), defaultChannel);
     }
 
     public Optional<AtherysChannel> getChannelById(String id) {
@@ -79,10 +89,14 @@ public class ChannelService {
 
     public void addPlayerToChannel(Player player, AtherysChannel channel) {
         channel.getPlayers().add(player.getUniqueId());
+        playerChannelMap.put(player.getUniqueId(), channel);
     }
 
     public void removePlayerFromChannel(Player player, AtherysChannel channel) {
         channel.getPlayers().remove(player.getUniqueId());
+        if (getPlayerChannel(player) == channel) {
+            addPlayerToChannel(player, defaultChannel);
+        }
     }
 
     public Text getNameWithPrefix(CommandSource commandSource) {
@@ -116,6 +130,16 @@ public class ChannelService {
         return Sponge.getServer().getOnlinePlayers().stream()
                 .filter(player -> channel.getPlayers().contains(player.getUniqueId()))
                 .collect(Collectors.toSet());
+    }
+
+    public void setEventChannel(MessageChannelEvent.Chat event) {
+        Optional<Player> optional = event.getCause().first(Player.class);
+        if(!optional.isPresent()) return;
+
+        Player player = optional.get();
+        AtherysChannel channel = getPlayerChannel(player);
+
+        event.setChannel(channel);
     }
 
     public void sendToChannel(AtherysChannel channel, @Nullable Object sender, Text original, ChatType type) {

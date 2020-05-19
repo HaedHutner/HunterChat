@@ -9,6 +9,7 @@ import com.google.inject.Singleton;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.text.Text;
 
 @Singleton
 public class ChannelFacade {
@@ -25,6 +26,10 @@ public class ChannelFacade {
     private ChatMessagingFacade cmf;
 
     public ChannelFacade() {
+    }
+
+    public void onPlayerJoin(Player player) {
+        channelService.setDefaultChannels(player);
     }
 
     public void joinChannel(Player source, AtherysChannel channel) throws CommandException {
@@ -52,9 +57,12 @@ public class ChannelFacade {
     }
 
     public void addPlayerToChannel(Player player, AtherysChannel channel) {
-        player.setMessageChannel(channel);
         channelService.addPlayerToChannel(player, channel);
         cmf.info(player, "You are now chatting in ", channel.getColor(), channel.getId(), ".");
+    }
+
+    public void speakToChannel(Player player, AtherysChannel channel, String message) {
+        channel.send(player, Text.of(message));
     }
 }
 

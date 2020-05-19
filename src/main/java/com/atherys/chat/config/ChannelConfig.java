@@ -5,6 +5,9 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @ConfigSerializable
 public class ChannelConfig {
 
@@ -18,9 +21,8 @@ public class ChannelConfig {
      * * "example.plugin.someChat.read" -- for read access
      * * "example.plugin.someChat.write" -- for write access
      * * "example.plugin.someChat.format" -- for sending formatted messages
-     * * "example.plugin.someChat.toggle" -- for toggling this chat on/off as their default destination for chat messages
      *
-     * If this is null, then by default it is understood that all players have permissions to read, write, format and toggle.
+     * If this is null, then by default it is understood that all players have permissions to read, write, format
      */
     @Setting("permission")
     private String permission;
