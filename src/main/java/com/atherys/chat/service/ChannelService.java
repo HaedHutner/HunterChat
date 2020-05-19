@@ -38,7 +38,7 @@ public class ChannelService {
 
     private Map<String, AtherysChannel> channels = new HashMap<>();
 
-    private Map<UUID, AtherysChannel> playerChannelMap = new HashMap<>();
+    private Map<UUID, AtherysChannel> playerSpeakingMap = new HashMap<>();
 
     private Set<AtherysChannel> autoJoinChannels = new HashSet<>();
 
@@ -77,10 +77,24 @@ public class ChannelService {
             addPlayerToChannel(player, channel);
         }
         addPlayerToChannel(player, defaultChannel);
+        setPlayerSpeakingChannel(player, defaultChannel);
+    }
+
+    public AtherysChannel getPlayerSpeakingChannel(Player player) {
+        return playerSpeakingMap.getOrDefault(player.getUniqueId(), defaultChannel);
+    }
+
+    public void setPlayerSpeakingChannel(Player player, AtherysChannel channel) {
+        playerSpeakingMap.put(player.getUniqueId(), channel);
     }
 
     public AtherysChannel getPlayerChannel(Player player) {
-        return playerChannelMap.getOrDefault(player.getUniqueId(), defaultChannel);
+        for (AtherysChannel channel : channels.values()) {
+            if (channel.getPlayers().contains(player.getUniqueId())) {
+                return channel;
+            }
+        }
+        return defaultChannel;
     }
 
     public Optional<AtherysChannel> getChannelById(String id) {
@@ -89,14 +103,10 @@ public class ChannelService {
 
     public void addPlayerToChannel(Player player, AtherysChannel channel) {
         channel.getPlayers().add(player.getUniqueId());
-        playerChannelMap.put(player.getUniqueId(), channel);
     }
 
     public void removePlayerFromChannel(Player player, AtherysChannel channel) {
         channel.getPlayers().remove(player.getUniqueId());
-        if (getPlayerChannel(player) == channel) {
-            addPlayerToChannel(player, defaultChannel);
-        }
     }
 
     public Text getNameWithPrefix(CommandSource commandSource) {
@@ -137,7 +147,7 @@ public class ChannelService {
         if(!optional.isPresent()) return;
 
         Player player = optional.get();
-        AtherysChannel channel = getPlayerChannel(player);
+        AtherysChannel channel = getPlayerSpeakingChannel(player);
 
         event.setChannel(channel);
     }

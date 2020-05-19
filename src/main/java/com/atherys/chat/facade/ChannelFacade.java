@@ -51,13 +51,15 @@ public class ChannelFacade {
     public void removePlayerFromChannel(Player player, AtherysChannel channel) {
         channelService.removePlayerFromChannel(player, channel);
 
-        if (player.getMessageChannel().equals(channel)) {
-            addPlayerToChannel(player, channelService.getPlayerChannel(player));
+        // If this is the players speaking channel, set it to another channel they are in
+        if (channel == channelService.getPlayerSpeakingChannel(player)) {
+            channelService.setPlayerSpeakingChannel(player, channelService.getPlayerChannel(player));
         }
     }
 
     public void addPlayerToChannel(Player player, AtherysChannel channel) {
         channelService.addPlayerToChannel(player, channel);
+        channelService.setPlayerSpeakingChannel(player, channel);
         cmf.info(player, "You are now chatting in ", channel.getColor(), channel.getId(), ".");
     }
 
