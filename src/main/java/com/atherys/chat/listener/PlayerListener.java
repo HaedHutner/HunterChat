@@ -4,7 +4,9 @@ import com.atherys.chat.facade.ChannelFacade;
 import com.atherys.chat.service.ChannelService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 
@@ -23,7 +25,7 @@ public class PlayerListener {
     }
 
     @Listener
-    public void onChat(MessageChannelEvent.Chat event) {
-        channelService.setEventChannel(event);
+    public void onChat(MessageChannelEvent.Chat event, @Root Player player) {
+        channelService.setEventChannel(event, player);
     }
 }

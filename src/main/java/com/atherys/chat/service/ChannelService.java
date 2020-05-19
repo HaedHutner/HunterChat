@@ -9,6 +9,7 @@ import com.google.inject.Singleton;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.ChatTypeMessageReceiver;
@@ -142,13 +143,8 @@ public class ChannelService {
                 .collect(Collectors.toSet());
     }
 
-    public void setEventChannel(MessageChannelEvent.Chat event) {
-        Optional<Player> optional = event.getCause().first(Player.class);
-        if(!optional.isPresent()) return;
-
-        Player player = optional.get();
+    public void setEventChannel(MessageChannelEvent.Chat event, Player player) {
         AtherysChannel channel = getPlayerSpeakingChannel(player);
-
         event.setChannel(channel);
     }
 
