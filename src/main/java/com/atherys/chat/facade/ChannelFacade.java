@@ -1,6 +1,6 @@
 package com.atherys.chat.facade;
 
-import com.atherys.chat.AtherysChatConfig;
+import com.atherys.chat.config.AtherysChatConfig;
 import com.atherys.chat.exception.AtherysChatException;
 import com.atherys.chat.model.AtherysChannel;
 import com.atherys.chat.service.ChannelService;
@@ -8,7 +8,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 
 @Singleton

@@ -1,6 +1,6 @@
 package com.atherys.chat.service;
 
-import com.atherys.chat.AtherysChatConfig;
+import com.atherys.chat.config.AtherysChatConfig;
 import com.atherys.chat.config.ChannelConfig;
 import com.atherys.chat.model.AtherysChannel;
 import com.atherys.core.AtherysCore;
@@ -9,7 +9,6 @@ import com.google.inject.Singleton;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.ChatTypeMessageReceiver;

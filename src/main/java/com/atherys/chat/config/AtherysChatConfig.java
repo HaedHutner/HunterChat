@@ -1,5 +1,6 @@
-package com.atherys.chat;
+package com.atherys.chat.config;
 
+import com.atherys.chat.AtherysChat;
 import com.atherys.chat.config.ChannelConfig;
 import com.atherys.core.utils.PluginConfig;
 import ninja.leaping.configurate.objectmapping.Setting;

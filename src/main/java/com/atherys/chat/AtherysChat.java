@@ -1,6 +1,7 @@
 package com.atherys.chat;
 
 import com.atherys.chat.command.ChatCommand;
+import com.atherys.chat.config.AtherysChatConfig;
 import com.atherys.chat.facade.ChannelFacade;
 import com.atherys.chat.facade.ChatMessagingFacade;
 import com.atherys.chat.listener.PlayerListener;
