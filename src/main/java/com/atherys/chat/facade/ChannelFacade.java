@@ -10,6 +10,7 @@ import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -83,7 +84,37 @@ public class ChannelFacade {
     }
 
     public void speakToChannel(Player player, AtherysChannel channel, String message) {
+        if (!channel.getPlayers().contains(player.getUniqueId())) {
+            chatService.addPlayerToChannel(player, channel);
+        }
         channel.send(player, Text.of(message));
+    }
+
+    public void displayPlayerChannels(Player player) {
+        Set<AtherysChannel> playerChannels = getPlayerChannels(player);
+        Set<AtherysChannel> availableChannels = getPlayerVisibleChannels(player);
+
+        Text.Builder builder;
+
+        // List the channel they are currently speaking in
+        builder = Text.builder()
+                .append(Text.of(TextColors.DARK_GREEN, "Currently speaking in: "))
+                .append(chatService.getPlayerSpeakingChannel(player).getTextName());
+        player.sendMessage(builder.build());
+
+        // List the currently joined in channels
+        builder = Text.builder()
+                .append(Text.of(TextColors.DARK_GREEN, "Joined channels: "))
+                .append(Text.joinWith(Text.of(", "), playerChannels.stream()
+                        .map(AtherysChannel::getTextName).collect(Collectors.toSet())));
+        player.sendMessage(builder.build());
+
+        // List the available channels
+        builder = Text.builder()
+                .append(Text.of(TextColors.DARK_GREEN, "Available channels: "))
+                .append(Text.joinWith(Text.of(", "), availableChannels.stream()
+                        .map(AtherysChannel::getTextName).collect(Collectors.toSet())));
+        player.sendMessage(builder.build());
     }
 }
 
