@@ -3,23 +3,25 @@ package com.atherys.chat.facade;
 import com.atherys.chat.config.AtherysChatConfig;
 import com.atherys.chat.exception.AtherysChatException;
 import com.atherys.chat.model.AtherysChannel;
-import com.atherys.chat.service.ChannelService;
+import com.atherys.chat.service.ChatService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Singleton
 public class ChannelFacade {
-
-    public static final String TEMPLATE_DELIMETER = "%";
 
     @Inject
     private AtherysChatConfig chatConfig;
 
     @Inject
-    private ChannelService channelService;
+    private ChatService chatService;
 
     @Inject
     private ChatMessagingFacade cmf;
@@ -28,7 +30,26 @@ public class ChannelFacade {
     }
 
     public void onPlayerJoin(Player player) {
-        channelService.setDefaultChannels(player);
+        chatService.setDefaultChannels(player);
+    }
+
+    public void onPlayerChat(MessageChannelEvent.Chat event, Player player) {
+        // TODO: Deal with Permissions
+        AtherysChannel channel = chatService.getPlayerSpeakingChannel(player);
+        event.setChannel(channel);
+    }
+
+    public Set<AtherysChannel> getPlayerChannels(Player player) {
+        return chatService.getChannels().values().stream()
+                .filter(channel -> channel.getPlayers().contains(player.getUniqueId()))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<AtherysChannel> getPlayerVisibleChannels(Player player) {
+        return chatService.getChannels().values().stream()
+                .filter(channel -> channel.getPermission() == null || player.hasPermission(channel.getPermission()))
+                .filter(channel -> channel.getPlayers().contains(player.getUniqueId()))
+                .collect(Collectors.toSet());
     }
 
     public void joinChannel(Player source, AtherysChannel channel) throws CommandException {
@@ -48,18 +69,18 @@ public class ChannelFacade {
     }
 
     public void removePlayerFromChannel(Player player, AtherysChannel channel) {
-        channelService.removePlayerFromChannel(player, channel);
+        chatService.removePlayerFromChannel(player, channel);
 
         // If this is the players speaking channel, set it to another channel they are in
-        if (channel == channelService.getPlayerSpeakingChannel(player)) {
-            channelService.setPlayerSpeakingChannel(player, channelService.getPlayerChannel(player));
+        if (channel == chatService.getPlayerSpeakingChannel(player)) {
+            chatService.setPlayerSpeakingChannel(player, chatService.getPlayerChannel(player));
         }
     }
 
     public void addPlayerToChannel(Player player, AtherysChannel channel) {
-        channelService.addPlayerToChannel(player, channel);
-        channelService.setPlayerSpeakingChannel(player, channel);
-        cmf.info(player, "You are now chatting in ", channel.getColor(), channel.getId(), ".");
+        chatService.addPlayerToChannel(player, channel);
+        chatService.setPlayerSpeakingChannel(player, channel);
+        cmf.info(player, "You are now chatting in ", channel.getName(), ".");
     }
 
     public void speakToChannel(Player player, AtherysChannel channel, String message) {

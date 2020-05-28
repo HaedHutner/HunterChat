@@ -1,33 +1,38 @@
 package com.atherys.chat.model;
 
 import com.atherys.chat.AtherysChat;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.ChatTypeMessageReceiver;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.chat.ChatType;
-import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.text.serializer.TextSerializers;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public class AtherysChannel implements MessageChannel {
+
+public abstract class AtherysChannel implements MessageChannel {
 
     private String id;
 
+    private String name;
+
     private String permission;
 
-    private boolean broadcast;
+    private String format;
 
-    private Text prefix;
+    private String prefix;
 
-    private TextColor color;
+    private String suffix;
 
-    private Set<UUID> players;
+    private Set<String> aliases;
 
-    private int range;
+    protected Set<UUID> players;
 
     public AtherysChannel(String id) {
         this.id = id;
@@ -38,36 +43,52 @@ public class AtherysChannel implements MessageChannel {
         return id;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = Optional.ofNullable(name).orElse(id);
+    }
+
     public String getPermission() {
         return permission;
     }
 
     public void setPermission(String permission) {
-        this.permission = permission;
+        this.permission = Optional.ofNullable(permission).orElse("atheryschat.channels." + id);;
     }
 
-    public boolean isBroadcast() {
-        return broadcast;
-    }
-
-    public void setBroadcast(boolean broadcast) {
-        this.broadcast = broadcast;
-    }
-
-    public Text getPrefix() {
+    public String getPrefix() {
         return prefix;
     }
 
-    public void setPrefix(Text prefix) {
-        this.prefix = prefix;
+    public void setPrefix(String prefix) {
+        this.prefix = Optional.ofNullable(prefix).orElse("");
     }
 
-    public TextColor getColor() {
-        return color;
+    public String getSuffix() {
+        return suffix;
     }
 
-    public void setColor(TextColor color) {
-        this.color = color;
+    public void setSuffix(String suffix) {
+        this.suffix = Optional.ofNullable(suffix).orElse("");
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
+    public void setFormat(String format) {
+        this.format = format;
+    }
+
+    public Set<String> getAliases() {
+        return aliases;
+    }
+
+    public void setAliases(Set<String> aliases) {
+        this.aliases = aliases;
     }
 
     public Set<UUID> getPlayers() {
@@ -78,38 +99,32 @@ public class AtherysChannel implements MessageChannel {
         this.players = players;
     }
 
-    public int getRange() {
-        return range;
-    }
-
-    public void setRange(int range) {
-        this.range = range;
-    }
-
     @Override
     public Optional<Text> transformMessage(@Nullable Object sender, MessageReceiver recipient, Text original, ChatType type) {
-        return AtherysChat.getInstance().getChannelService().transformMessage(this, sender, recipient, original);
+        return AtherysChat.getInstance().getChatMessagingFacade().formatMessage(this, sender, recipient, original);
     }
 
     @Override
     public Collection<MessageReceiver> getMembers() {
-        return AtherysChat.getInstance().getChannelService().getChannelMembers(this);
+        return Sponge.getServer().getOnlinePlayers().stream()
+                .filter(player -> getPlayers().contains(player.getUniqueId()))
+                .collect(Collectors.toSet());
     }
 
-    public Collection<MessageReceiver> getMembers(Object sender) {
-        if (sender instanceof Player && this.range > 0) {
-            Player player = (Player) sender;
-
-            return player.getNearbyEntities(range).stream()
-                    .filter(entity -> entity instanceof Player && this.players.contains(entity.getUniqueId()))
-                    .map(entity -> (Player) entity)
-                    .collect(Collectors.toSet());
-        }
-
-        return getMembers();
-    }
+    public abstract Collection<MessageReceiver> getMembers(Object sender);
 
     public void send(@Nullable Object sender, Text original, ChatType type) {
-        AtherysChat.getInstance().getChannelService().sendToChannel(this, sender, original, type);
+        checkNotNull(original, "original text");
+        checkNotNull(type, "type");
+
+        // TODO Handle Permissions
+
+        for (MessageReceiver member : this.getMembers(sender)) {
+            if (member instanceof ChatTypeMessageReceiver) {
+                this.transformMessage(sender, member, original, type).ifPresent(text -> ((ChatTypeMessageReceiver) member).sendMessage(type, text));
+            } else {
+                this.transformMessage(sender, member, original, type).ifPresent(member::sendMessage);
+            }
+        }
     }
 }

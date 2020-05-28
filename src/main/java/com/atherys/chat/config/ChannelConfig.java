@@ -1,5 +1,6 @@
 package com.atherys.chat.config;
 
+import com.atherys.chat.model.ChannelType;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.api.text.format.TextColor;
@@ -14,6 +15,9 @@ public class ChannelConfig {
     @Setting("id")
     private String id;
 
+    @Setting("name")
+    private String name;
+
     /**
      * If the configured permission is "example.plugin.someChat",
      * then the following permissions can be assigned:
@@ -27,14 +31,20 @@ public class ChannelConfig {
     @Setting("permission")
     private String permission;
 
-    @Setting("is-broadcast")
-    private boolean broadcastChannel = true;
+    @Setting("type")
+    private ChannelType type = ChannelType.GLOBAL;
 
-    @Setting("color")
-    private TextColor color = TextColors.WHITE;
+    @Setting("format")
+    private String format = "%cprefix %player: %message %csuffix";
 
     @Setting("prefix")
     private String prefix = "[Default]";
+
+    @Setting("suffix")
+    private String suffix;
+
+    @Setting("aliases")
+    private Set<String> aliases;
 
     @Setting("range")
     private int range;
@@ -47,20 +57,32 @@ public class ChannelConfig {
         return id;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public ChannelType getType() {
+        return type;
+    }
+
+    public String getFormat() {
+        return format;
+    }
+
     public String getPermission() {
         return permission;
     }
 
-    public boolean isBroadcastChannel() {
-        return broadcastChannel;
-    }
-
-    public TextColor getColor() {
-        return color;
-    }
-
     public String getPrefix() {
         return prefix;
+    }
+
+    public String getSuffix() {
+        return suffix;
+    }
+
+    public Set<String> getAliases() {
+        return aliases;
     }
 
     public int getRange() {

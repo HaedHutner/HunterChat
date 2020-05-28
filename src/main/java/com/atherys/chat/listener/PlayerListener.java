@@ -1,7 +1,7 @@
 package com.atherys.chat.listener;
 
 import com.atherys.chat.facade.ChannelFacade;
-import com.atherys.chat.service.ChannelService;
+import com.atherys.chat.service.ChatService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.entity.living.player.Player;
@@ -16,9 +16,6 @@ public class PlayerListener {
     @Inject
     private ChannelFacade channelFacade;
 
-    @Inject
-    private ChannelService channelService;
-
     @Listener
     public void onJoin(ClientConnectionEvent.Join event) {
         channelFacade.onPlayerJoin(event.getTargetEntity());
@@ -26,6 +23,6 @@ public class PlayerListener {
 
     @Listener
     public void onChat(MessageChannelEvent.Chat event, @Root Player player) {
-        channelService.setEventChannel(event, player);
+        channelFacade.onPlayerChat(event, player);
     }
 }
