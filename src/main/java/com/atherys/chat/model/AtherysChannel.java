@@ -47,6 +47,10 @@ public abstract class AtherysChannel implements MessageChannel {
         return name;
     }
 
+    public Text getTextName() {
+        return TextSerializers.FORMATTING_CODE.deserialize(name);
+    }
+
     public void setName(String name) {
         this.name = Optional.ofNullable(name).orElse(id);
     }

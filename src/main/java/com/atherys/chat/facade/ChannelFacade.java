@@ -54,7 +54,7 @@ public class ChannelFacade {
 
     public void joinChannel(Player source, AtherysChannel channel) throws CommandException {
         if (channel.getPermission() != null && !source.hasPermission(channel.getPermission())) {
-            throw new AtherysChatException("You do not have permission to join the ", channel.getId(), " channel.");
+            throw new AtherysChatException("You do not have permission to join the ", channel.getTextName(), " channel.");
         }
 
         addPlayerToChannel(source, channel);
@@ -80,7 +80,7 @@ public class ChannelFacade {
     public void addPlayerToChannel(Player player, AtherysChannel channel) {
         chatService.addPlayerToChannel(player, channel);
         chatService.setPlayerSpeakingChannel(player, channel);
-        cmf.info(player, "You are now chatting in ", channel.getName(), ".");
+        cmf.info(player, "You are now chatting in ", channel.getTextName(), ".");
     }
 
     public void speakToChannel(Player player, AtherysChannel channel, String message) {
