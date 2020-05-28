@@ -48,7 +48,6 @@ public class ChannelFacade {
     public Set<AtherysChannel> getPlayerVisibleChannels(Player player) {
         return chatService.getChannels().values().stream()
                 .filter(channel -> channel.getPermission() == null || player.hasPermission(channel.getPermission()))
-                .filter(channel -> channel.getPlayers().contains(player.getUniqueId()))
                 .collect(Collectors.toSet());
     }
 

@@ -12,11 +12,8 @@ import java.util.Set;
 @ConfigSerializable
 public class ChannelConfig {
 
-    @Setting("id")
-    private String id;
-
     @Setting("name")
-    private String name;
+    public String name = "&7Global";
 
     /**
      * If the configured permission is "example.plugin.someChat",
@@ -29,64 +26,24 @@ public class ChannelConfig {
      * If this is null, then by default it is understood that all players have permissions to read, write, format
      */
     @Setting("permission")
-    private String permission;
+    public String permission;
 
     @Setting("type")
-    private ChannelType type = ChannelType.GLOBAL;
+    public ChannelType type = ChannelType.GLOBAL;
 
     @Setting("format")
-    private String format = "%cprefix %player: %message %csuffix";
+    public String format = "%cprefix %player: %message %csuffix";
 
     @Setting("prefix")
-    private String prefix = "[Default]";
+    public String prefix = "[§2Global&r]";
 
     @Setting("suffix")
-    private String suffix;
+    public String suffix;
 
     @Setting("aliases")
-    private Set<String> aliases;
+    public Set<String> aliases;
 
     @Setting("range")
-    private int range;
-
-    public ChannelConfig() {
-        this.id = "default";
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public ChannelType getType() {
-        return type;
-    }
-
-    public String getFormat() {
-        return format;
-    }
-
-    public String getPermission() {
-        return permission;
-    }
-
-    public String getPrefix() {
-        return prefix;
-    }
-
-    public String getSuffix() {
-        return suffix;
-    }
-
-    public Set<String> getAliases() {
-        return aliases;
-    }
-
-    public int getRange() {
-        return range;
-    }
+    public int range;
 
 }

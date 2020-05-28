@@ -14,6 +14,7 @@ import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.serializer.TextSerializer;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
+import java.nio.channels.Channel;
 import java.util.*;
 
 @Singleton
@@ -31,34 +32,37 @@ public class AtherysChatService implements ChatService {
     private AtherysChannel defaultChannel;
 
     public void init() {
-        for (ChannelConfig channelConfig : config.CHANNELS) {
+
+        for (Map.Entry<String, ChannelConfig> entry : config.CHANNELS.entrySet()) {
+            String id = entry.getKey();
+            ChannelConfig channelConfig = entry.getValue();
             AtherysChannel channel;
 
-            switch (channelConfig.getType()) {
+            switch (channelConfig.type) {
                 case BROADCAST:
-                    channel = new BroadcastChannel(channelConfig.getId());
+                    channel = new BroadcastChannel(id);
                     break;
                 case GLOBAL:
-                    channel = new GlobalChannel(channelConfig.getId());
+                    channel = new GlobalChannel(id);
                     break;
                 case WORLD:
-                    channel = new WorldChannel(channelConfig.getId());
+                    channel = new WorldChannel(id);
                     break;
                 case RANGE:
-                    channel = new RangeChannel(channelConfig.getId(), channelConfig.getRange());
+                    channel = new RangeChannel(id, channelConfig.range);
                     break;
                 default:
-                    AtherysChat.getInstance().getLogger().error("Unknown Channel type: " + channelConfig.getType() +
-                                                                " for channel" + channelConfig.getId());
-                    channel = new GlobalChannel(channelConfig.getId());
+                    AtherysChat.getInstance().getLogger().error("Unknown Channel type: " + channelConfig.type +
+                                                                " for channel" + id);
+                    channel = new GlobalChannel(id);
             }
 
-            channel.setPermission(channelConfig.getPermission());
-            channel.setFormat(channelConfig.getFormat());
-            channel.setName(channelConfig.getName());
-            channel.setPrefix(channelConfig.getPrefix());
-            channel.setSuffix(channelConfig.getSuffix());
-            channel.setAliases(channelConfig.getAliases());
+            channel.setPermission(channelConfig.permission);
+            channel.setFormat(channelConfig.format);
+            channel.setName(channelConfig.name);
+            channel.setPrefix(channelConfig.prefix);
+            channel.setSuffix(channelConfig.suffix);
+            channel.setAliases(channelConfig.aliases);
 
             registerChannel(channel);
         }
