@@ -5,7 +5,6 @@ import com.atherys.chat.config.AtherysChatConfig;
 import com.atherys.chat.facade.ChannelFacade;
 import com.atherys.chat.facade.ChatMessagingFacade;
 import com.atherys.chat.listener.PlayerListener;
-import com.atherys.chat.service.AtherysChatService;
 import com.atherys.chat.service.ChatService;
 import com.atherys.core.command.CommandService;
 import com.google.inject.Inject;
@@ -126,7 +125,7 @@ public class AtherysChat {
         ChannelFacade channelFacade;
 
         @Inject
-        AtherysChatService chatService;
+        ChatService chatService;
 
         @Inject
         ChatMessagingFacade chatMessagingFacade;
