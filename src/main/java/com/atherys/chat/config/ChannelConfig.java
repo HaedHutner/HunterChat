@@ -1,5 +1,6 @@
 package com.atherys.chat.config;
 
+import com.atherys.chat.model.ChannelType;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.api.text.format.TextColor;
@@ -11,8 +12,8 @@ import java.util.Set;
 @ConfigSerializable
 public class ChannelConfig {
 
-    @Setting("id")
-    private String id;
+    @Setting("name")
+    public String name = "&7Global";
 
     /**
      * If the configured permission is "example.plugin.someChat",
@@ -25,46 +26,24 @@ public class ChannelConfig {
      * If this is null, then by default it is understood that all players have permissions to read, write, format
      */
     @Setting("permission")
-    private String permission;
+    public String permission;
 
-    @Setting("is-broadcast")
-    private boolean broadcastChannel = true;
+    @Setting("type")
+    public ChannelType type = ChannelType.GLOBAL;
 
-    @Setting("color")
-    private TextColor color = TextColors.WHITE;
+    @Setting("format")
+    public String format = "%cprefix %player: %message %csuffix";
 
     @Setting("prefix")
-    private String prefix = "[Default]";
+    public String prefix = "[§2Global&r]";
+
+    @Setting("suffix")
+    public String suffix;
+
+    @Setting("aliases")
+    public Set<String> aliases;
 
     @Setting("range")
-    private int range;
-
-    public ChannelConfig() {
-        this.id = "default";
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getPermission() {
-        return permission;
-    }
-
-    public boolean isBroadcastChannel() {
-        return broadcastChannel;
-    }
-
-    public TextColor getColor() {
-        return color;
-    }
-
-    public String getPrefix() {
-        return prefix;
-    }
-
-    public int getRange() {
-        return range;
-    }
+    public int range;
 
 }

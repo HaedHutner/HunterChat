@@ -16,7 +16,7 @@ import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nonnull;
 
-@Aliases("speak")
+@Aliases({"speak", "say", "s"})
 @Description("Speak to a channel channel")
 public class SpeakChannelCommand implements PlayerCommand, ParameterizedCommand {
     @Nonnull

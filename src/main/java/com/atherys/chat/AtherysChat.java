@@ -1,10 +1,11 @@
 package com.atherys.chat;
 
 import com.atherys.chat.command.ChatCommand;
+import com.atherys.chat.config.AtherysChatConfig;
 import com.atherys.chat.facade.ChannelFacade;
 import com.atherys.chat.facade.ChatMessagingFacade;
 import com.atherys.chat.listener.PlayerListener;
-import com.atherys.chat.service.ChannelService;
+import com.atherys.chat.service.ChatService;
 import com.atherys.core.command.CommandService;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -55,8 +56,13 @@ public class AtherysChat {
 
         components = new Components();
 
-        chatInjector = spongeInjector.createChildInjector();
+        chatInjector = spongeInjector.createChildInjector(new AtherysChatModule());
         chatInjector.injectMembers(components);
+
+        components.config.init();
+        components.chatService.init();
+
+        Sponge.getServiceManager().setProvider(container, ChatService.class, components.chatService);
 
         // Register listeners
         Sponge.getEventManager().registerListeners(this, components.playerListener);
@@ -67,13 +73,10 @@ public class AtherysChat {
             e.printStackTrace();
         }
 
-        components.config.init();
-
         init = true;
     }
 
     private void start() {
-        getChannelService().init();
     }
 
     private void stop() {
@@ -102,8 +105,8 @@ public class AtherysChat {
         return components.channelFacade;
     }
 
-    public ChannelService getChannelService() {
-        return components.channelService;
+    public ChatService getChatService() {
+        return components.chatService;
     }
 
     public Logger getLogger() {
@@ -122,7 +125,7 @@ public class AtherysChat {
         ChannelFacade channelFacade;
 
         @Inject
-        ChannelService channelService;
+        ChatService chatService;
 
         @Inject
         ChatMessagingFacade chatMessagingFacade;
