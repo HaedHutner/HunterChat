@@ -2,6 +2,8 @@ package com.atherys.chat.model;
 
 import com.atherys.chat.AtherysChat;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.ChatTypeMessageReceiver;
 import org.spongepowered.api.text.channel.MessageChannel;
@@ -17,6 +19,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 
 public abstract class AtherysChannel implements MessageChannel {
+
+    private static final String READ_POSTFIX = ".read";
+
+    private static final String WRITE_POSTFIX = ".write";
+
+    private static final String LEAVE_POSTFIX = ".toggle";
+
+    private static final String FORMAT_POSTFIX = ".format";
 
     private String id;
 
@@ -103,6 +113,22 @@ public abstract class AtherysChannel implements MessageChannel {
         this.players = players;
     }
 
+    public boolean hasReadPermission(CommandSource src) {
+        return src.hasPermission(this.permission + READ_POSTFIX);
+    }
+
+    public boolean hasWritePermission(CommandSource src) {
+        return src.hasPermission(this.permission + WRITE_POSTFIX);
+    }
+
+    public boolean hasLeavePermission(CommandSource src) {
+        return src.hasPermission(this.permission + LEAVE_POSTFIX);
+    }
+
+    public boolean hasFormatPermission(CommandSource src) {
+        return src.hasPermission(this.permission + FORMAT_POSTFIX);
+    }
+
     @Override
     public Optional<Text> transformMessage(@Nullable Object sender, MessageReceiver recipient, Text original, ChatType type) {
         return AtherysChat.getInstance().getChatMessagingFacade().formatMessage(this, sender, recipient, original);
@@ -121,9 +147,13 @@ public abstract class AtherysChannel implements MessageChannel {
         checkNotNull(original, "original text");
         checkNotNull(type, "type");
 
-        // TODO Handle Permissions
-
         for (MessageReceiver member : this.getMembers(sender)) {
+            if (member instanceof Player && !this.hasReadPermission((Player) member)) {
+                // Allow a user to read their own messages
+                if (sender == null || !sender.equals(member)) {
+                    continue;
+                }
+            }
             if (member instanceof ChatTypeMessageReceiver) {
                 this.transformMessage(sender, member, original, type).ifPresent(text -> ((ChatTypeMessageReceiver) member).sendMessage(type, text));
             } else {

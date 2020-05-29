@@ -1,5 +1,6 @@
 package com.atherys.chat.facade;
 
+import com.atherys.chat.AtherysChat;
 import com.atherys.chat.config.AtherysChatConfig;
 import com.atherys.chat.exception.AtherysChatException;
 import com.atherys.chat.model.AtherysChannel;
@@ -36,8 +37,13 @@ public class ChannelFacade {
     }
 
     public void onPlayerChat(MessageChannelEvent.Chat event, Player player) {
-        // TODO: Deal with Permissions
         AtherysChannel channel = chatService.getPlayerSpeakingChannel(player);
+        if (!channel.hasWritePermission(player)) {
+            event.setCancelled(true);
+            Text message = cmf.formatError("You do not have permission to talk in the ", channel.getTextName(), " channel.");
+            player.sendMessage(message);
+            return;
+        }
         event.setChannel(channel);
     }
 
@@ -60,14 +66,16 @@ public class ChannelFacade {
     }
 
     public void joinChannel(Player source, AtherysChannel channel) throws CommandException {
-        if (channel.getPermission() != null && !source.hasPermission(channel.getPermission())) {
+        if (!channel.hasReadPermission(source)){
             throw new AtherysChatException("You do not have permission to join the ", channel.getTextName(), " channel.");
         }
-
         addPlayerToChannel(source, channel);
     }
 
     public void leaveChannel(Player source, AtherysChannel channel) throws CommandException {
+        if (!channel.hasLeavePermission(source)) {
+            throw new AtherysChatException("You do not have permission to leave the ", channel.getTextName(), " channel.");
+        }
         if (channel.getPlayers().contains(source.getUniqueId())) {
             removePlayerFromChannel(source, channel);
         } else {
@@ -90,7 +98,10 @@ public class ChannelFacade {
         cmf.info(player, "You are now chatting in ", channel.getTextName(), ".");
     }
 
-    public void speakToChannel(Player player, AtherysChannel channel, String message) {
+    public void speakToChannel(Player player, AtherysChannel channel, String message) throws CommandException {
+        if (!channel.hasWritePermission(player)) {
+            throw new AtherysChatException("You do not have permission to talk in the ", channel.getTextName(), " channel.");
+        }
         if (!channel.getPlayers().contains(player.getUniqueId())) {
             chatService.addPlayerToChannel(player, channel);
         }
