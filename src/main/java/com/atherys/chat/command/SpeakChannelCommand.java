@@ -6,6 +6,7 @@ import com.atherys.core.command.ParameterizedCommand;
 import com.atherys.core.command.PlayerCommand;
 import com.atherys.core.command.annotation.Aliases;
 import com.atherys.core.command.annotation.Description;
+import com.atherys.core.command.annotation.Permission;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.CommandContext;
@@ -18,6 +19,7 @@ import javax.annotation.Nonnull;
 
 @Aliases({"speak", "say", "s"})
 @Description("Speak to a channel channel")
+@Permission("atheryschat.commands.speak")
 public class SpeakChannelCommand implements PlayerCommand, ParameterizedCommand {
     @Nonnull
     @Override

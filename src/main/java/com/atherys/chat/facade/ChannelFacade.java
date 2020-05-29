@@ -12,6 +12,7 @@ import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,16 +41,22 @@ public class ChannelFacade {
         event.setChannel(channel);
     }
 
-    public Set<AtherysChannel> getPlayerChannels(Player player) {
+    public Set<AtherysChannel> getPlayerVisibleChannels(Player player) {
+        return chatService.getChannels().values().stream()
+                .filter(channel -> channel.getPermission() == null || player.hasPermission(channel.getPermission()))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<AtherysChannel> getPlayerMemberChannels(Player player) {
         return chatService.getChannels().values().stream()
                 .filter(channel -> channel.getPlayers().contains(player.getUniqueId()))
                 .collect(Collectors.toSet());
     }
 
-    public Set<AtherysChannel> getPlayerVisibleChannels(Player player) {
-        return chatService.getChannels().values().stream()
-                .filter(channel -> channel.getPermission() == null || player.hasPermission(channel.getPermission()))
-                .collect(Collectors.toSet());
+    public Set<AtherysChannel> getPlayerNonMemberChannels(Player player) {
+        Set<AtherysChannel> nonMemberChannels = new HashSet<>(getPlayerVisibleChannels(player));
+        nonMemberChannels.removeAll(getPlayerMemberChannels(player));
+        return nonMemberChannels;
     }
 
     public void joinChannel(Player source, AtherysChannel channel) throws CommandException {
@@ -91,9 +98,6 @@ public class ChannelFacade {
     }
 
     public void displayPlayerChannels(Player player) {
-        Set<AtherysChannel> playerChannels = getPlayerChannels(player);
-        Set<AtherysChannel> availableChannels = getPlayerVisibleChannels(player);
-
         Text.Builder builder;
 
         // List the channel they are currently speaking in
@@ -105,14 +109,14 @@ public class ChannelFacade {
         // List the currently joined in channels
         builder = Text.builder()
                 .append(Text.of(TextColors.DARK_GREEN, "Joined channels: "))
-                .append(Text.joinWith(Text.of(", "), playerChannels.stream()
+                .append(Text.joinWith(Text.of(", "), getPlayerMemberChannels(player).stream()
                         .map(AtherysChannel::getTextName).collect(Collectors.toSet())));
         player.sendMessage(builder.build());
 
         // List the available channels
         builder = Text.builder()
                 .append(Text.of(TextColors.DARK_GREEN, "Available channels: "))
-                .append(Text.joinWith(Text.of(", "), availableChannels.stream()
+                .append(Text.joinWith(Text.of(", "), getPlayerNonMemberChannels(player).stream()
                         .map(AtherysChannel::getTextName).collect(Collectors.toSet())));
         player.sendMessage(builder.build());
     }
