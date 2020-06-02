@@ -1,11 +1,15 @@
 package com.atherys.chat.service;
 
 import com.atherys.chat.AtherysChat;
+import com.atherys.chat.command.ChannelAliasCommand;
+import com.atherys.chat.command.ChatCommand;
 import com.atherys.chat.config.AtherysChatConfig;
 import com.atherys.chat.config.ChannelConfig;
 import com.atherys.chat.model.*;
+import com.atherys.core.command.CommandService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.message.MessageChannelEvent;
@@ -77,7 +81,12 @@ public class ChatService {
     public void registerChannel(AtherysChannel channel) {
         this.channels.put(channel.getId(), channel);
 
-        // TODO: Deal with channel commands
+        // Register aliases
+        if (!channel.getAliases().isEmpty()) {
+            String[] aliases = new String[channel.getAliases().size()];
+            channel.getAliases().toArray(aliases);
+            Sponge.getCommandManager().register(AtherysChat.getInstance(), new ChannelAliasCommand(channel).getSpec(), aliases);
+        }
 
         if (config.AUTO_JOIN_CHANNELS.contains(channel.getId())) {
             this.autoJoinChannels.add(channel);
