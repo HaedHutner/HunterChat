@@ -38,7 +38,7 @@ public class ChannelFacade {
 
     public void onPlayerChat(MessageChannelEvent.Chat event, Player player) {
         AtherysChannel channel = chatService.getPlayerSpeakingChannel(player);
-        if (!channel.hasWritePermission(player)) {
+        if (!chatService.hasWritePermission(player, channel)) {
             event.setCancelled(true);
             Text message = cmf.formatError("You do not have permission to talk in the ", channel.getTextName(), " channel.");
             player.sendMessage(message);
@@ -66,14 +66,14 @@ public class ChannelFacade {
     }
 
     public void joinChannel(Player source, AtherysChannel channel) throws CommandException {
-        if (!channel.hasReadPermission(source)){
+        if (!chatService.hasReadPermission(source, channel)){
             throw new AtherysChatException("You do not have permission to join the ", channel.getTextName(), " channel.");
         }
         addPlayerToChannel(source, channel);
     }
 
     public void leaveChannel(Player source, AtherysChannel channel) throws CommandException {
-        if (!channel.hasLeavePermission(source)) {
+        if (!chatService.hasLeavePermission(source, channel)) {
             throw new AtherysChatException("You do not have permission to leave the ", channel.getTextName(), " channel.");
         }
         if (channel.getPlayers().contains(source.getUniqueId())) {
@@ -99,7 +99,7 @@ public class ChannelFacade {
     }
 
     public void speakToChannel(Player player, AtherysChannel channel, String message) throws CommandException {
-        if (!channel.hasWritePermission(player)) {
+        if (!chatService.hasWritePermission(player, channel)) {
             throw new AtherysChatException("You do not have permission to talk in the ", channel.getTextName(), " channel.");
         }
         if (!channel.getPlayers().contains(player.getUniqueId())) {

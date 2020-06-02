@@ -20,14 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public abstract class AtherysChannel implements MessageChannel {
 
-    private static final String READ_POSTFIX = ".read";
-
-    private static final String WRITE_POSTFIX = ".write";
-
-    private static final String LEAVE_POSTFIX = ".toggle";
-
-    private static final String FORMAT_POSTFIX = ".format";
-
     private String id;
 
     private String name;
@@ -113,22 +105,6 @@ public abstract class AtherysChannel implements MessageChannel {
         this.players = players;
     }
 
-    public boolean hasReadPermission(CommandSource src) {
-        return src.hasPermission(this.permission + READ_POSTFIX);
-    }
-
-    public boolean hasWritePermission(CommandSource src) {
-        return src.hasPermission(this.permission + WRITE_POSTFIX);
-    }
-
-    public boolean hasLeavePermission(CommandSource src) {
-        return src.hasPermission(this.permission + LEAVE_POSTFIX);
-    }
-
-    public boolean hasFormatPermission(CommandSource src) {
-        return src.hasPermission(this.permission + FORMAT_POSTFIX);
-    }
-
     @Override
     public Optional<Text> transformMessage(@Nullable Object sender, MessageReceiver recipient, Text original, ChatType type) {
         return AtherysChat.getInstance().getChatMessagingFacade().formatMessage(this, sender, recipient, original);
@@ -148,7 +124,7 @@ public abstract class AtherysChannel implements MessageChannel {
         checkNotNull(type, "type");
 
         for (MessageReceiver member : this.getMembers(sender)) {
-            if (member instanceof Player && !this.hasReadPermission((Player) member)) {
+            if (member instanceof Player && !AtherysChat.getInstance().getChatService().hasReadPermission((Player) member, this)) {
                 // Allow a user to read their own messages
                 if (sender == null || !sender.equals(member)) {
                     continue;

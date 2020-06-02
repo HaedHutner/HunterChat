@@ -2,7 +2,9 @@ package com.atherys.chat.facade;
 
 import com.atherys.chat.AtherysChat;
 import com.atherys.chat.model.AtherysChannel;
+import com.atherys.chat.service.ChatService;
 import com.atherys.core.utils.AbstractMessagingFacade;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
@@ -15,6 +17,10 @@ import java.util.regex.Pattern;
 
 @Singleton
 public class ChatMessagingFacade extends AbstractMessagingFacade {
+
+    @Inject
+    private ChatService chatService;
+
     public ChatMessagingFacade() {
         super("Chat");
     }
@@ -35,7 +41,7 @@ public class ChatMessagingFacade extends AbstractMessagingFacade {
             message = message.replaceFirst("<" + playerName + ">", "").trim();
 
             // Check for formatting permissions
-            if (!channel.hasFormatPermission(commandSource)) {
+            if (!chatService.hasFormatPermission(commandSource, channel)) {
                 Pattern formatCodes = Pattern.compile("(?i)&([a-f0-9rl-ok])");
                 message = message.replaceAll(formatCodes.pattern(), "");
             }
