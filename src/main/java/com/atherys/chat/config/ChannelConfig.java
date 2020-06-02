@@ -21,7 +21,7 @@ public class ChannelConfig {
      *
      * * "example.plugin.someChat.read" -- for read access
      * * "example.plugin.someChat.speak" -- for write access
-     * * "example.plugin.someChat.leave" -- permission to leave the channel
+     * * "example.plugin.someChat.leave" --\ permission to leave the channel
      * * "example.plugin.someChat.format" -- for sending formatted messages
      *
      * If this is null, then by default it is understood that all players have permissions to read, write, format

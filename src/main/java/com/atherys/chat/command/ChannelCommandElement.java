@@ -55,9 +55,8 @@ public class ChannelCommandElement extends CommandElement {
             return AtherysChat.getInstance().getChannelFacade().getPlayerVisibleChannels((Player) src).stream()
                     .map(AtherysChannel::getId)
                     .collect(Collectors.toList());
-        }
         // List all channels that the player
-        else if (this.returnNonMemberChannels) {
+        } else if (this.returnNonMemberChannels) {
             return AtherysChat.getInstance().getChannelFacade().getPlayerNonMemberChannels((Player) src).stream()
                     .map(AtherysChannel::getId)
                     .collect(Collectors.toList());

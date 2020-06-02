@@ -1,6 +1,5 @@
 package com.atherys.chat.facade;
 
-import com.atherys.chat.AtherysChat;
 import com.atherys.chat.config.AtherysChatConfig;
 import com.atherys.chat.exception.AtherysChatException;
 import com.atherys.chat.model.AtherysChannel;
@@ -81,6 +80,8 @@ public class ChannelFacade {
         } else {
             throw new AtherysChatException("You are not in that channel.");
         }
+
+        cmf.info(source, "You have left ", channel.getTextName(), ".");
     }
 
     public void removePlayerFromChannel(Player player, AtherysChannel channel) {
@@ -103,9 +104,15 @@ public class ChannelFacade {
             throw new AtherysChatException("You do not have permission to talk in the ", channel.getTextName(), " channel.");
         }
         if (!channel.getPlayers().contains(player.getUniqueId())) {
+            cmf.info(player, "You have joined ", channel.getTextName(), ".");
             chatService.addPlayerToChannel(player, channel);
         }
         channel.send(player, Text.of(message));
+    }
+
+    public void setSpeakingChannel(Player player, AtherysChannel channel) {
+        chatService.setPlayerSpeakingChannel(player, channel);
+        cmf.info(player, "You are now speaking in ", channel.getTextName(), ".");
     }
 
     public void displayPlayerChannels(Player player) {
