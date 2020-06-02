@@ -29,7 +29,6 @@ public class ChatMessagingFacade extends AbstractMessagingFacade {
         String prefix = "";
         String suffix = "";
         String message = original.toPlain();
-        Text messageText = original;
 
         // Remove the player information from the message
         if (sender instanceof CommandSource) {
@@ -40,9 +39,7 @@ public class ChatMessagingFacade extends AbstractMessagingFacade {
             message = message.replaceFirst("<" + playerName + ">", "").trim();
 
             if (!chatService.hasFormatPermission(commandSource, channel)) {
-                messageText = TextSerializers.PLAIN.deserialize(message);
-            } else {
-                messageText = TextSerializers.FORMATTING_CODE.deserialize(message);
+                message = TextSerializers.FORMATTING_CODE.stripCodes(message);
             }
         }
 
@@ -57,12 +54,11 @@ public class ChatMessagingFacade extends AbstractMessagingFacade {
                 .replace("%cprefix", channel.getPrefix())
                 .replace("%csuffix", channel.getSuffix())
                 .replace("%player", playerName)
+                .replace("%message", message)
                 .replace("%world", world);
 
         Text.Builder builder = Text.builder();
         builder.append(TextSerializers.FORMATTING_CODE.deserialize(format));
-        Text result = Text.builder().build();
-        result = result.replace("%message", messageText);
-        return Optional.of(result);
+        return Optional.of(builder.build());
     }
 }
