@@ -2,6 +2,8 @@ package com.atherys.chat.model;
 
 import com.atherys.chat.AtherysChat;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.ChatTypeMessageReceiver;
 import org.spongepowered.api.text.channel.MessageChannel;
@@ -121,9 +123,13 @@ public abstract class AtherysChannel implements MessageChannel {
         checkNotNull(original, "original text");
         checkNotNull(type, "type");
 
-        // TODO Handle Permissions
-
         for (MessageReceiver member : this.getMembers(sender)) {
+            if (member instanceof Player && !AtherysChat.getInstance().getChatService().hasReadPermission((Player) member, this)) {
+                // Allow a user to read their own messages
+                if (sender == null || !sender.equals(member)) {
+                    continue;
+                }
+            }
             if (member instanceof ChatTypeMessageReceiver) {
                 this.transformMessage(sender, member, original, type).ifPresent(text -> ((ChatTypeMessageReceiver) member).sendMessage(type, text));
             } else {

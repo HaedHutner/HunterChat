@@ -1,5 +1,6 @@
 package com.atherys.chat.facade;
 
+import com.atherys.chat.AtherysChat;
 import com.atherys.chat.config.AtherysChatConfig;
 import com.atherys.chat.exception.AtherysChatException;
 import com.atherys.chat.model.AtherysChannel;
@@ -12,6 +13,7 @@ import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,15 +37,14 @@ public class ChannelFacade {
     }
 
     public void onPlayerChat(MessageChannelEvent.Chat event, Player player) {
-        // TODO: Deal with Permissions
         AtherysChannel channel = chatService.getPlayerSpeakingChannel(player);
+        if (!chatService.hasWritePermission(player, channel)) {
+            event.setCancelled(true);
+            Text message = cmf.formatError("You do not have permission to talk in the ", channel.getTextName(), " channel.");
+            player.sendMessage(message);
+            return;
+        }
         event.setChannel(channel);
-    }
-
-    public Set<AtherysChannel> getPlayerChannels(Player player) {
-        return chatService.getChannels().values().stream()
-                .filter(channel -> channel.getPlayers().contains(player.getUniqueId()))
-                .collect(Collectors.toSet());
     }
 
     public Set<AtherysChannel> getPlayerVisibleChannels(Player player) {
@@ -52,15 +53,29 @@ public class ChannelFacade {
                 .collect(Collectors.toSet());
     }
 
+    public Set<AtherysChannel> getPlayerMemberChannels(Player player) {
+        return chatService.getChannels().values().stream()
+                .filter(channel -> channel.getPlayers().contains(player.getUniqueId()))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<AtherysChannel> getPlayerNonMemberChannels(Player player) {
+        Set<AtherysChannel> nonMemberChannels = new HashSet<>(getPlayerVisibleChannels(player));
+        nonMemberChannels.removeAll(getPlayerMemberChannels(player));
+        return nonMemberChannels;
+    }
+
     public void joinChannel(Player source, AtherysChannel channel) throws CommandException {
-        if (channel.getPermission() != null && !source.hasPermission(channel.getPermission())) {
+        if (!chatService.hasReadPermission(source, channel)){
             throw new AtherysChatException("You do not have permission to join the ", channel.getTextName(), " channel.");
         }
-
         addPlayerToChannel(source, channel);
     }
 
     public void leaveChannel(Player source, AtherysChannel channel) throws CommandException {
+        if (!chatService.hasLeavePermission(source, channel)) {
+            throw new AtherysChatException("You do not have permission to leave the ", channel.getTextName(), " channel.");
+        }
         if (channel.getPlayers().contains(source.getUniqueId())) {
             removePlayerFromChannel(source, channel);
         } else {
@@ -83,7 +98,10 @@ public class ChannelFacade {
         cmf.info(player, "You are now chatting in ", channel.getTextName(), ".");
     }
 
-    public void speakToChannel(Player player, AtherysChannel channel, String message) {
+    public void speakToChannel(Player player, AtherysChannel channel, String message) throws CommandException {
+        if (!chatService.hasWritePermission(player, channel)) {
+            throw new AtherysChatException("You do not have permission to talk in the ", channel.getTextName(), " channel.");
+        }
         if (!channel.getPlayers().contains(player.getUniqueId())) {
             chatService.addPlayerToChannel(player, channel);
         }
@@ -91,9 +109,6 @@ public class ChannelFacade {
     }
 
     public void displayPlayerChannels(Player player) {
-        Set<AtherysChannel> playerChannels = getPlayerChannels(player);
-        Set<AtherysChannel> availableChannels = getPlayerVisibleChannels(player);
-
         Text.Builder builder;
 
         // List the channel they are currently speaking in
@@ -105,14 +120,14 @@ public class ChannelFacade {
         // List the currently joined in channels
         builder = Text.builder()
                 .append(Text.of(TextColors.DARK_GREEN, "Joined channels: "))
-                .append(Text.joinWith(Text.of(", "), playerChannels.stream()
+                .append(Text.joinWith(Text.of(", "), getPlayerMemberChannels(player).stream()
                         .map(AtherysChannel::getTextName).collect(Collectors.toSet())));
         player.sendMessage(builder.build());
 
         // List the available channels
         builder = Text.builder()
                 .append(Text.of(TextColors.DARK_GREEN, "Available channels: "))
-                .append(Text.joinWith(Text.of(", "), availableChannels.stream()
+                .append(Text.joinWith(Text.of(", "), getPlayerNonMemberChannels(player).stream()
                         .map(AtherysChannel::getTextName).collect(Collectors.toSet())));
         player.sendMessage(builder.build());
     }

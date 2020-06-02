@@ -19,6 +19,10 @@ import java.util.*;
 
 @Singleton
 public class ChatService {
+    private static final String READ_POSTFIX = ".read";
+    private static final String WRITE_POSTFIX = ".write";
+    private static final String LEAVE_POSTFIX = ".toggle";
+    private static final String FORMAT_POSTFIX = ".format";
 
     @Inject
     private AtherysChatConfig config;
@@ -124,4 +128,22 @@ public class ChatService {
     public void removePlayerFromChannel(Player player, AtherysChannel channel) {
         channel.getPlayers().remove(player.getUniqueId());
     }
+
+    public boolean hasReadPermission(CommandSource src, AtherysChannel channel) {
+        return src.hasPermission(channel.getPermission() + READ_POSTFIX);
+    }
+
+    public boolean hasWritePermission(CommandSource src, AtherysChannel channel) {
+        return src.hasPermission(channel.getPermission() + WRITE_POSTFIX);
+    }
+
+    public boolean hasLeavePermission(CommandSource src, AtherysChannel channel) {
+        return src.hasPermission(channel.getPermission() + LEAVE_POSTFIX);
+    }
+
+    public boolean hasFormatPermission(CommandSource src, AtherysChannel channel) {
+        return src.hasPermission(channel.getPermission() + FORMAT_POSTFIX);
+    }
+
+
 }

@@ -2,7 +2,6 @@ package com.atherys.chat.command;
 
 import com.atherys.chat.AtherysChat;
 import com.atherys.chat.model.AtherysChannel;
-import com.atherys.core.AtherysCore;
 import com.atherys.core.command.ParameterizedCommand;
 import com.atherys.core.command.PlayerCommand;
 import com.atherys.core.command.annotation.Aliases;
@@ -19,7 +18,7 @@ import javax.annotation.Nonnull;
 
 @Aliases("leave")
 @Description("Leaves a chat channel.")
-@Permission("atheryscore.chat.leave")
+@Permission("atheryschat.commands.leave")
 public class LeaveChannelCommand implements PlayerCommand, ParameterizedCommand {
     @Nonnull
     @Override
@@ -31,7 +30,7 @@ public class LeaveChannelCommand implements PlayerCommand, ParameterizedCommand 
     @Override
     public CommandElement[] getArguments() {
         return new CommandElement[]{
-                new ChannelCommandElement(Text.of("channel"))
+                new ChannelCommandElement(Text.of("channel"), false, true)
         };
     }
 }
