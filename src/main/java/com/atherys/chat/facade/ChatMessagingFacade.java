@@ -1,6 +1,5 @@
 package com.atherys.chat.facade;
 
-import com.atherys.chat.AtherysChat;
 import com.atherys.chat.model.AtherysChannel;
 import com.atherys.chat.service.ChatService;
 import com.atherys.core.utils.AbstractMessagingFacade;
@@ -13,7 +12,6 @@ import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Singleton
 public class ChatMessagingFacade extends AbstractMessagingFacade {
@@ -31,6 +29,7 @@ public class ChatMessagingFacade extends AbstractMessagingFacade {
         String prefix = "";
         String suffix = "";
         String message = original.toPlain();
+        Text messageText = original;
 
         // Remove the player information from the message
         if (sender instanceof CommandSource) {
@@ -40,10 +39,10 @@ public class ChatMessagingFacade extends AbstractMessagingFacade {
             suffix = commandSource.getOption("suffix").orElse("");
             message = message.replaceFirst("<" + playerName + ">", "").trim();
 
-            // Check for formatting permissions
             if (!chatService.hasFormatPermission(commandSource, channel)) {
-                Pattern formatCodes = Pattern.compile("(?i)&([a-f0-9rl-ok])");
-                message = message.replaceAll(formatCodes.pattern(), "");
+                messageText = TextSerializers.PLAIN.deserialize(message);
+            } else {
+                messageText = TextSerializers.FORMATTING_CODE.deserialize(message);
             }
         }
 
@@ -58,11 +57,12 @@ public class ChatMessagingFacade extends AbstractMessagingFacade {
                 .replace("%cprefix", channel.getPrefix())
                 .replace("%csuffix", channel.getSuffix())
                 .replace("%player", playerName)
-                .replace("%message", message)
                 .replace("%world", world);
 
         Text.Builder builder = Text.builder();
         builder.append(TextSerializers.FORMATTING_CODE.deserialize(format));
-        return Optional.of(builder.build());
+        Text result = Text.builder().build();
+        result = result.replace("%message", messageText);
+        return Optional.of(result);
     }
 }
