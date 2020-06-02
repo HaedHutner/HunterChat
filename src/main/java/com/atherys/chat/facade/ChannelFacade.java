@@ -1,6 +1,5 @@
 package com.atherys.chat.facade;
 
-import com.atherys.chat.AtherysChat;
 import com.atherys.chat.config.AtherysChatConfig;
 import com.atherys.chat.exception.AtherysChatException;
 import com.atherys.chat.model.AtherysChannel;
