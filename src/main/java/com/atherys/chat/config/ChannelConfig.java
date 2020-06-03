@@ -42,7 +42,7 @@ public class ChannelConfig {
     public String suffix;
 
     @Setting("aliases")
-    public Set<String> aliases;
+    public Set<String> aliases = new HashSet<>();
 
     @Setting("range")
     public int range;

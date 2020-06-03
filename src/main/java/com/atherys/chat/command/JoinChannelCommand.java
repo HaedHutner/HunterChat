@@ -30,7 +30,7 @@ public class JoinChannelCommand implements PlayerCommand, ParameterizedCommand {
     @Override
     public CommandElement[] getArguments() {
         return new CommandElement[]{
-                new ChannelCommandElement(Text.of("channel"), true, false)
+                new ChannelCommandElement(Text.of("channel"))
         };
     }
 }
