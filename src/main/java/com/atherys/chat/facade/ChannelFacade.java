@@ -110,11 +110,6 @@ public class ChannelFacade {
         channel.send(player, Text.of(message));
     }
 
-    public void setSpeakingChannel(Player player, AtherysChannel channel) {
-        chatService.setPlayerSpeakingChannel(player, channel);
-        cmf.info(player, "You are now speaking in ", channel.getTextName(), ".");
-    }
-
     public void displayPlayerChannels(Player player) {
         Text.Builder builder;
 

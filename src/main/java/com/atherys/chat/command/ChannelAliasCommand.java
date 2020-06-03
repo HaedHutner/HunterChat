@@ -33,7 +33,7 @@ public class ChannelAliasCommand implements PlayerCommand, CommandExecutor {
         if (args.getOne("message").isPresent()) {
             AtherysChat.getInstance().getChannelFacade().speakToChannel(player, channel, args.<String>getOne("message").get());
         } else {
-            AtherysChat.getInstance().getChannelFacade().setSpeakingChannel(player, channel);
+            AtherysChat.getInstance().getChannelFacade().joinChannel(player, channel);
         }
         return CommandResult.success();
     }

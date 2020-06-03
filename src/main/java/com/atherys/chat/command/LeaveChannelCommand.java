@@ -30,7 +30,7 @@ public class LeaveChannelCommand implements PlayerCommand, ParameterizedCommand 
     @Override
     public CommandElement[] getArguments() {
         return new CommandElement[]{
-                new ChannelCommandElement(Text.of("channel"), false, true)
+                new ChannelCommandElement(Text.of("channel"), true, false)
         };
     }
 }
