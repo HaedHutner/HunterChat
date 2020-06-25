@@ -5,12 +5,15 @@ import com.atherys.chat.command.ChannelAliasCommand;
 import com.atherys.chat.command.ChatCommand;
 import com.atherys.chat.config.AtherysChatConfig;
 import com.atherys.chat.config.ChannelConfig;
+import com.atherys.chat.event.ChatRegistrationEvent;
 import com.atherys.chat.model.*;
 import com.atherys.core.command.CommandService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.ImmutableCommandMapping;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
@@ -33,7 +36,7 @@ public class ChatService {
 
     private Map<String, AtherysChannel> channels = new HashMap<>();
 
-    private Map<UUID, AtherysChannel> playerSpeakingMap = new HashMap<>();
+    private Map<UUID, String> playerSpeakingMap = new HashMap<>();
 
     private Set<AtherysChannel> autoJoinChannels = new HashSet<>();
 
@@ -94,7 +97,32 @@ public class ChatService {
     }
 
     public void reload() {
-        // TODO: Support reloading configuration
+        // Reload Configuration
+        config.init();
+
+        // Remove the existing mappings for the current channels
+        for (AtherysChannel channel : this.channels.values()) {
+            for (String alias : channel.getAliases()) {
+                Optional<? extends CommandMapping> mapping = Sponge.getCommandManager().get("atheryschat:" + alias);
+                mapping.ifPresent(commandMapping -> Sponge.getCommandManager().removeMapping(commandMapping));
+            }
+        }
+
+        Map<String, AtherysChannel> oldChannels = new HashMap<>(this.channels);
+        this.channels = new HashMap<>();
+        this.autoJoinChannels = new HashSet<>();
+
+        // Reprocess our config
+        this.init();
+
+        // Add players back to the channels they were in before
+        for (AtherysChannel channel : this.channels.values()) {
+            AtherysChannel oldChannel = oldChannels.get(channel.getId());
+            if (oldChannel != null)
+                channel.getPlayers().addAll(oldChannel.getPlayers());
+        }
+
+        Sponge.getEventManager().post(new ChatRegistrationEvent(this));
     }
 
     public Map<String, AtherysChannel> getChannels() {
@@ -110,11 +138,12 @@ public class ChatService {
     }
 
     public AtherysChannel getPlayerSpeakingChannel(Player player) {
-        return playerSpeakingMap.getOrDefault(player.getUniqueId(), defaultChannel);
+        String chanId = playerSpeakingMap.get(player.getUniqueId());
+        return channels.getOrDefault(chanId, defaultChannel);
     }
 
     public void setPlayerSpeakingChannel(Player player, AtherysChannel channel) {
-        playerSpeakingMap.put(player.getUniqueId(), channel);
+        playerSpeakingMap.put(player.getUniqueId(), channel.getId());
     }
 
     public AtherysChannel getPlayerChannel(Player player) {

@@ -1,12 +1,16 @@
 package com.atherys.chat.facade;
 
+import com.atherys.chat.AtherysChat;
 import com.atherys.chat.config.AtherysChatConfig;
+import com.atherys.chat.event.ChatRegistrationEvent;
 import com.atherys.chat.exception.AtherysChatException;
 import com.atherys.chat.model.AtherysChannel;
 import com.atherys.chat.service.ChatService;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
@@ -132,6 +136,11 @@ public class ChannelFacade {
                 .append(Text.joinWith(Text.of(", "), getPlayerNonMemberChannels(player).stream()
                         .map(AtherysChannel::getTextName).collect(Collectors.toSet())));
         player.sendMessage(builder.build());
+    }
+
+    public void reload(CommandSource src) {
+        chatService.reload();
+        cmf.info(src, "Chat reloaded");
     }
 }
 

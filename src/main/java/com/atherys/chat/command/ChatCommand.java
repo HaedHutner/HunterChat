@@ -17,7 +17,8 @@ import org.spongepowered.api.entity.living.player.Player;
 @Children({
         JoinChannelCommand.class,
         LeaveChannelCommand.class,
-        SpeakChannelCommand.class
+        SpeakChannelCommand.class,
+        ReloadCommand.class
 })
 public class ChatCommand implements PlayerCommand, CommandExecutor {
     @Override

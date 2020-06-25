@@ -1,6 +1,7 @@
 package com.atherys.chat.config;
 
 import com.atherys.chat.model.ChannelType;
+import com.google.common.collect.Sets;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.spongepowered.api.text.format.TextColor;
@@ -42,7 +43,7 @@ public class ChannelConfig {
     public String suffix;
 
     @Setting("aliases")
-    public Set<String> aliases = new HashSet<>();
+    public Set<String> aliases = Sets.newHashSet("gc");
 
     @Setting("range")
     public int range;

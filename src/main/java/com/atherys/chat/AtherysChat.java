@@ -2,6 +2,7 @@ package com.atherys.chat;
 
 import com.atherys.chat.command.ChatCommand;
 import com.atherys.chat.config.AtherysChatConfig;
+import com.atherys.chat.event.ChatRegistrationEvent;
 import com.atherys.chat.facade.ChannelFacade;
 import com.atherys.chat.facade.ChatMessagingFacade;
 import com.atherys.chat.listener.PlayerListener;
@@ -12,6 +13,7 @@ import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppedServerEvent;
@@ -73,6 +75,8 @@ public class AtherysChat {
             e.printStackTrace();
         }
 
+        Sponge.getEventManager().post(new ChatRegistrationEvent(components.chatService));
+
         init = true;
     }
 
@@ -80,6 +84,10 @@ public class AtherysChat {
     }
 
     private void stop() {
+    }
+
+    private void reload() {
+        components.chatService.reload();
     }
 
     @Listener
@@ -98,6 +106,13 @@ public class AtherysChat {
     public void onStop(GameStoppedServerEvent event) {
         if (init) {
             stop();
+        }
+    }
+
+    @Listener
+    public void onReload(GameReloadEvent event) {
+        if (init) {
+            reload();
         }
     }
 

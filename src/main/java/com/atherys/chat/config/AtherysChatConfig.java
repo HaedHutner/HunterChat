@@ -4,6 +4,7 @@ import com.atherys.chat.AtherysChat;
 import com.atherys.chat.config.ChannelConfig;
 import com.atherys.chat.model.ChannelType;
 import com.atherys.core.utils.PluginConfig;
+import com.google.common.collect.Sets;
 import ninja.leaping.configurate.objectmapping.Setting;
 
 import javax.inject.Singleton;
@@ -27,18 +28,21 @@ public class AtherysChatConfig extends PluginConfig {
         local.type = ChannelType.RANGE;
         local.prefix = "[&3Local&r]";
         local.range = 20;
+        local.aliases = Sets.newHashSet("lc");
         CHANNELS.put("local", local);
 
         ChannelConfig broadcast = new ChannelConfig();
         broadcast.name = "&4Broadcast";
         broadcast.type = ChannelType.BROADCAST;
         broadcast.prefix = "[&4Broadcast&r]";
+        broadcast.aliases = Sets.newHashSet("bc");
         CHANNELS.put("broadcast", broadcast);
 
         ChannelConfig world = new ChannelConfig();
         world.name = "&5World";
         world.type = ChannelType.WORLD;
         world.prefix = "[&5World&r]";
+        world.aliases = Sets.newHashSet("wc");
         CHANNELS.put("world", world);
     }
 
