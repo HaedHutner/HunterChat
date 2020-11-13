@@ -118,6 +118,7 @@ public abstract class AtherysChannel implements MessageChannel {
 
     public abstract Collection<MessageReceiver> getMembers(Object sender);
 
+    @Override
     public void send(@Nullable Object sender, Text original, ChatType type) {
         checkNotNull(original, "original text");
         checkNotNull(type, "type");

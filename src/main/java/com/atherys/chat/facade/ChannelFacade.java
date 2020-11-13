@@ -1,5 +1,6 @@
 package com.atherys.chat.facade;
 
+import com.atherys.chat.AtherysChat;
 import com.atherys.chat.config.AtherysChatConfig;
 import com.atherys.chat.exception.AtherysChatException;
 import com.atherys.chat.model.AtherysChannel;
@@ -10,6 +11,7 @@ import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.message.MessageChannelEvent;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.HashSet;
@@ -36,14 +38,15 @@ public class ChannelFacade {
     }
 
     public void onPlayerChat(MessageChannelEvent.Chat event, Player player) {
+        event.setCancelled(true);
+
         AtherysChannel channel = chatService.getPlayerSpeakingChannel(player);
         if (!chatService.hasWritePermission(player, channel)) {
-            event.setCancelled(true);
             Text message = cmf.formatError("You do not have permission to talk in the ", channel.getTextName(), " channel.");
             player.sendMessage(message);
             return;
         }
-        event.setChannel(channel);
+        channel.send(player, event.getOriginalMessage(), ChatTypes.CHAT);
     }
 
     public Set<AtherysChannel> getPlayerVisibleChannels(Player player) {
