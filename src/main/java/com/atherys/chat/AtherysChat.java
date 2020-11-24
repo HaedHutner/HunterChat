@@ -28,7 +28,7 @@ public class AtherysChat {
     public static final String ID = "atheryschat";
     public static final String NAME = "A'therys Chat";
     public static final String DESCRIPTION = "A chat plugin for the A'therys Horizons server";
-    public static final String VERSION = "%PLUGIN_VERSION%";
+    public static final String VERSION = "%PROJECT_VERSION%";
 
     private static AtherysChat instance;
 
