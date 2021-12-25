@@ -1,5 +1,5 @@
-# AtherysChat
-A chat plugin for the A'therys Horizons server
+# HunterChat
+A chat plugin for the Hunter plugin suite
 
 ## Permissions
 
@@ -10,7 +10,7 @@ See commands section
 ### Channel permissions
 
 Each channel has a permission setting, this forms the base of the channels permissions.
-This defaults to "atheryschat.channels.<channel-id>"
+This defaults to "hunterchat.channels.<channel-id>"
 
 | Permission | Description |
 |---|---|
@@ -23,10 +23,10 @@ This defaults to "atheryschat.channels.<channel-id>"
 
 | Command | Description | Permission |
 |---|---|---|
-| /chat | Lists the players current channels | atheryschat.commands |
-| /chat join \<channel\> | Joins a specific channel | atheryschat.commands.join |
-| /chat leave \<channel\> | Leaves a specific channel | atheryschat.commands.leave |
-| /chat say \<channel\> \<message\> | Sends a message directly to a channel | atheryschat.commands.speak |
+| /chat | Lists the players current channels | hunterchat.commands |
+| /chat join \<channel\> | Joins a specific channel | hunterchat.commands.join |
+| /chat leave \<channel\> | Leaves a specific channel | hunterchat.commands.leave |
+| /chat say \<channel\> \<message\> | Sends a message directly to a channel | hunterchat.commands.speak |
 
 ## Chat Configuration
 
@@ -45,7 +45,7 @@ Channel configurations are provided as a map of channel-ids to channel configura
 | Config Item | Description |
 |---|---|
 | name | Display name of the channel, supports formatting codes |
-| permission | Defaults to "atheryschat.channels.<channel-id>" |
+| permission | Defaults to "hunterchat.channels.<channel-id>" |
 | format | How to format messages sent to this channel |
 |        | Defaults to "%cprefix %player: %message %csuffix"
 |        | Supports colour codes and variables
